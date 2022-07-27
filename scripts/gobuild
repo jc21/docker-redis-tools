@@ -1,0 +1,34 @@
+#!/bin/bash -e
+
+# Usage:
+#  $1 the package name, ie: redis-renamer
+#  $2 the version, ie: 1.0.0
+
+BLUE='\E[1;34m'
+CYAN='\E[1;36m'
+YELLOW='\E[1;33m'
+RESET='\E[0m'
+
+export GOOS=linux
+
+# Determine the correct binary file for the architecture given
+case ${TARGETPLATFORM:-linux/amd64} in
+	linux/arm64)
+		export GOARCH=arm64
+		;;
+
+	linux/arm/v7)
+		export GOARCH=arm
+		;;
+
+	*)
+		export GOARCH=amd64
+		;;
+esac
+
+echo -e "${BLUE}❯ ${CYAN}Building $1 binary for ${YELLOW}${GOARCH} (${TARGETPLATFORM})${RESET}"
+
+go build \
+	-ldflags "-w -s -X main.version=$2" \
+	-o "/workspace/$1" \
+	"./cmd/$1"
